@@ -219,32 +219,33 @@ namespace CustomRPC.CLI
                 Console.Clear();
                 WriteColor("  ── 設定を編集 ──\n\n", ConsoleColor.Cyan);
 
-                var fields = new (char Key, string Label, string Value, string Field)[]
+                var fields = new (char Key, string Label, string Value, string Field, string Desc)[]
                 {
-                    ('1', "Application ID", config.Id,           "id"),
-                    ('2', "タイプ",          TypeName(config.Type),"type"),
-                    ('3', "ゲーム名 (Name)", config.Name,         "name"),
-                    ('4', "Details",        config.Details,      "details"),
-                    ('5', "State",          config.State,        "state"),
-                    ('6', "大画像キー",      config.LargeKey,    "largeKey"),
-                    ('7', "大画像テキスト", config.LargeText,    "largeText"),
-                    ('8', "小画像キー",      config.SmallKey,    "smallKey"),
-                    ('9', "小画像テキスト", config.SmallText,    "smallText"),
-                    ('A', "ボタン1 テキスト",config.Button1Text, "button1Text"),
-                    ('B', "ボタン1 URL",    config.Button1Url,  "button1Url"),
-                    ('C', "ボタン2 テキスト",config.Button2Text, "button2Text"),
-                    ('D', "ボタン2 URL",    config.Button2Url,  "button2Url"),
-                    ('E', "パイプ番号",     config.Pipe == -1 ? "自動" : config.Pipe.ToString(), "pipe"),
-                    ('F', "タイムスタンプ", ((TimestampType)config.Timestamps).ToString(), "timestamps"),
-                    ('G', "自動接続",       config.AutoConnect ? "有効" : "無効", "autoConnect"),
+                    ('1', "Application ID",  config.Id,           "id",          "Discord Developer Portal のアプリ ID。空欄 = CustomRP デフォルト ID"),
+                    ('2', "タイプ",          TypeName(config.Type),"type",        "0=Playing  1=Streaming  2=Listening  3=Watching  5=Competing"),
+                    ('3', "ゲーム名 (Name)", config.Name,         "name",        "「〇〇をプレイ中」の名前部分。未設定 = Discord アプリ名をそのまま表示"),
+                    ('4', "Details",        config.Details,      "details",     "プレゼンスの1行目（最大 128 文字）"),
+                    ('5', "State",          config.State,        "state",       "プレゼンスの2行目（最大 128 文字）"),
+                    ('6', "大画像キー",      config.LargeKey,    "largeKey",    "Developer Portal の画像キー名、または画像の直接 URL"),
+                    ('7', "大画像テキスト", config.LargeText,    "largeText",   "大画像にカーソルを当てると表示されるテキスト（最大 128 文字）"),
+                    ('8', "小画像キー",      config.SmallKey,    "smallKey",    "大画像の右下に重なる小さな画像のキーまたは URL"),
+                    ('9', "小画像テキスト", config.SmallText,    "smallText",   "小画像のホバーテキスト（最大 128 文字）"),
+                    ('A', "ボタン1 テキスト",config.Button1Text, "button1Text", "ボタンに表示するラベル（最大 32 文字）。URL も設定すると表示される"),
+                    ('B', "ボタン1 URL",    config.Button1Url,  "button1Url",  "ボタンをクリックで開く URL（https:// が必要）"),
+                    ('C', "ボタン2 テキスト",config.Button2Text, "button2Text", "2つ目のボタンのラベル（最大 32 文字）"),
+                    ('D', "ボタン2 URL",    config.Button2Url,  "button2Url",  "2つ目のボタンの URL"),
+                    ('E', "パイプ番号",     config.Pipe == -1 ? "自動" : config.Pipe.ToString(), "pipe",        "Discord の接続パイプ番号。通常は「自動」(-1)でOK"),
+                    ('F', "タイムスタンプ", ((TimestampType)config.Timestamps).ToString(), "timestamps",  "経過時間の表示方法（0〜4）。0=最終接続から 1=起動から 2=現地時刻 4=更新から"),
+                    ('G', "自動接続",       config.AutoConnect ? "有効" : "無効", "autoConnect", "起動時に自動で Discord に接続する（有効 / 無効）"),
                 };
 
-                foreach (var (k, lbl, val, _) in fields)
+                foreach (var (k, lbl, val, _, desc) in fields)
                 {
                     WriteColor($"  [{k}] ", ConsoleColor.DarkCyan);
-                    Console.Write($"{lbl,-18}: ");
+                    Console.Write(PadRight(lbl, 16) + ": ");
                     WriteColor(string.IsNullOrEmpty(val) ? "(未設定)" : val, ConsoleColor.White);
                     Console.WriteLine();
+                    WriteColor($"      {desc}\n", ConsoleColor.DarkGray);
                 }
 
                 Console.WriteLine();
