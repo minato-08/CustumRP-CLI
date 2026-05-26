@@ -1,0 +1,15 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+publish/
+*.log
+
+## macOS
+.DS_Store
+
+## JetBrains
+.idea/
+*.sln.iml
