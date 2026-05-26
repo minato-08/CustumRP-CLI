@@ -115,13 +115,26 @@ namespace CustomRPC.CLI
             while (true)
             {
                 RenderMain();
-                var key = Console.ReadKey(true);
-                switch (char.ToLower(key.KeyChar))
+
+                // Bug1修正: ReadKey でブロックせず 500ms ごとに再描画
+                // → 接続完了・失敗などのバックグラウンド状態変化が即座に反映される
+                char ch = WaitForKey(refreshMs: 500);
+                if (ch == '\0') continue; // タイムアウト → 再描画のみ
+
+                switch (char.ToLower(ch))
                 {
-                    case 'c': rpc!.Connect();    Pause(400); break;
-                    case 'd': rpc!.Disconnect(); Pause(200); break;
+                    case 'c':
+                        // Bug2修正: 接続中・接続済みのときは無視
+                        if (rpc!.State is RpcState.Disconnected or RpcState.Error)
+                            rpc.Connect();
+                        break;
+                    case 'd':
+                        // Bug2修正: 切断済みのときは無視
+                        if (rpc!.State is not RpcState.Disconnected)
+                            rpc.Disconnect();
+                        break;
                     case 'u':
-                        if (rpc!.State == RpcState.Connected) { rpc.SetPresence(); Pause(300); }
+                        if (rpc!.State == RpcState.Connected) rpc.SetPresence();
                         break;
                     case 's': EditSettings(); break;
                     case 'p': LoadPreset();   break;
@@ -129,6 +142,22 @@ namespace CustomRPC.CLI
                     case 'q': return;
                 }
             }
+        }
+
+        /// <summary>
+        /// キー入力を最大 <paramref name="refreshMs"/> ms 待つ。
+        /// タイムアウトしたら '\0' を返す（呼び出し側は再描画すればよい）。
+        /// </summary>
+        static char WaitForKey(int refreshMs = 500)
+        {
+            var deadline = DateTime.Now.AddMilliseconds(refreshMs);
+            while (DateTime.Now < deadline)
+            {
+                if (Console.KeyAvailable)
+                    return Console.ReadKey(true).KeyChar;
+                Thread.Sleep(30);
+            }
+            return '\0';
         }
 
         // ── メイン画面描画 ────────────────────────────────────────────────────
@@ -339,23 +368,47 @@ namespace CustomRPC.CLI
 ");
 
         // ── ユーティリティ ────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Bug3修正: 全角文字（CJK）は端末幅 2 を占めるため、パディング計算を表示幅ベースにする。
+        /// </summary>
+        static int DisplayWidth(string s) =>
+            s.Sum(c => c >= 0x1100 &&
+                (c <= 0x115F || c == 0x2329 || c == 0x232A ||
+                 (c >= 0x2E80 && c <= 0x303E) ||
+                 (c >= 0x3040 && c <= 0xA4CF) ||
+                 (c >= 0xAC00 && c <= 0xD7A3) ||
+                 (c >= 0xF900 && c <= 0xFAFF) ||
+                 (c >= 0xFE10 && c <= 0xFE19) ||
+                 (c >= 0xFE30 && c <= 0xFE6F) ||
+                 (c >= 0xFF00 && c <= 0xFF60) ||
+                 (c >= 0xFFE0 && c <= 0xFFE6)) ? 2 : 1);
+
+        static string PadRight(string s, int width)
+        {
+            int pad = width - DisplayWidth(s);
+            return pad > 0 ? s + new string(' ', pad) : s;
+        }
+
         static void PrintField(string label, string value)
         {
             if (string.IsNullOrEmpty(value)) return;
-            WriteColor($"  {label,-14}: ", ConsoleColor.DarkGray);
+            WriteColor($"  {PadRight(label, 14)}: ", ConsoleColor.DarkGray);
             Console.WriteLine(value.Length > 58 ? value[..55] + "…" : value);
         }
 
         static void MenuKey(char key, string label, bool enabled)
         {
+            // ラベル幅を全角対応で固定（最長ラベル「プレゼンス更新」= 表示幅 12）
+            string padded = PadRight(label, 10);
             if (enabled)
             {
                 WriteColor($"  [{key}] ", ConsoleColor.White);
-                Console.Write($"{label}   ");
+                Console.Write($"{padded}  ");
             }
             else
             {
-                WriteColor($"  [{key}] {label}   ", ConsoleColor.DarkGray);
+                WriteColor($"  [{key}] {padded}  ", ConsoleColor.DarkGray);
             }
         }
 
