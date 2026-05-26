@@ -11,8 +11,4 @@
     <Description>Custom Discord Rich Presence Manager - CLI version for macOS/Linux/Windows</Description>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- Lachee's Discord RPC library (cross-platform) -->
-    <PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
-  </ItemGroup>
 </Project>

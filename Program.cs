@@ -187,6 +187,8 @@ namespace CustomRPC.CLI
             // 設定サマリー
             PrintField("Application ID", string.IsNullOrEmpty(config.Id) ? "(デフォルト)" : config.Id);
             PrintField("タイプ",    TypeName(config.Type));
+            if (!string.IsNullOrEmpty(config.Name))
+                PrintField("ゲーム名",   config.Name);
             PrintField("Details",  config.Details);
             PrintField("State",    config.State);
             if (!string.IsNullOrEmpty(config.LargeKey))   PrintField("大画像",   config.LargeKey);
@@ -221,19 +223,20 @@ namespace CustomRPC.CLI
                 {
                     ('1', "Application ID", config.Id,           "id"),
                     ('2', "タイプ",          TypeName(config.Type),"type"),
-                    ('3', "Details",        config.Details,      "details"),
-                    ('4', "State",          config.State,        "state"),
-                    ('5', "大画像キー",      config.LargeKey,    "largeKey"),
-                    ('6', "大画像テキスト", config.LargeText,    "largeText"),
-                    ('7', "小画像キー",      config.SmallKey,    "smallKey"),
-                    ('8', "小画像テキスト", config.SmallText,    "smallText"),
-                    ('9', "ボタン1 テキスト",config.Button1Text, "button1Text"),
-                    ('A', "ボタン1 URL",    config.Button1Url,  "button1Url"),
-                    ('B', "ボタン2 テキスト",config.Button2Text, "button2Text"),
-                    ('C', "ボタン2 URL",    config.Button2Url,  "button2Url"),
-                    ('D', "パイプ番号",     config.Pipe == -1 ? "自動" : config.Pipe.ToString(), "pipe"),
-                    ('E', "タイムスタンプ", ((TimestampType)config.Timestamps).ToString(), "timestamps"),
-                    ('F', "自動接続",       config.AutoConnect ? "有効" : "無効", "autoConnect"),
+                    ('3', "ゲーム名 (Name)", config.Name,         "name"),
+                    ('4', "Details",        config.Details,      "details"),
+                    ('5', "State",          config.State,        "state"),
+                    ('6', "大画像キー",      config.LargeKey,    "largeKey"),
+                    ('7', "大画像テキスト", config.LargeText,    "largeText"),
+                    ('8', "小画像キー",      config.SmallKey,    "smallKey"),
+                    ('9', "小画像テキスト", config.SmallText,    "smallText"),
+                    ('A', "ボタン1 テキスト",config.Button1Text, "button1Text"),
+                    ('B', "ボタン1 URL",    config.Button1Url,  "button1Url"),
+                    ('C', "ボタン2 テキスト",config.Button2Text, "button2Text"),
+                    ('D', "ボタン2 URL",    config.Button2Url,  "button2Url"),
+                    ('E', "パイプ番号",     config.Pipe == -1 ? "自動" : config.Pipe.ToString(), "pipe"),
+                    ('F', "タイムスタンプ", ((TimestampType)config.Timestamps).ToString(), "timestamps"),
+                    ('G', "自動接続",       config.AutoConnect ? "有効" : "無効", "autoConnect"),
                 };
 
                 foreach (var (k, lbl, val, _) in fields)
@@ -270,6 +273,7 @@ namespace CustomRPC.CLI
             {
                 case "id":          config.Id         = input; break;
                 case "type":        ParseType(input); break;
+                case "name":        config.Name       = input; break;
                 case "details":     config.Details    = input; break;
                 case "state":       config.State      = input; break;
                 case "largeKey":    config.LargeKey   = input; break;

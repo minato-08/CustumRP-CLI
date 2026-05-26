@@ -1,12 +1,13 @@
-using DiscordRPC.Logging;
-
 namespace CustomRPC.CLI
 {
+    /// <summary>ログの詳細レベル。</summary>
+    public enum LogLevel { Trace, Info, Warning, Error, None }
+
     /// <summary>
     /// Logs Discord RPC messages to dated files in the config logs directory.
-    /// Ported from the original Windows-only version — no changes needed.
+    /// Ported from the original Windows-only version — NuGet ILogger dependency removed.
     /// </summary>
-    public class TimestampFileLogger : ILogger
+    public class TimestampFileLogger
     {
         public LogLevel Level { get; set; }
 
